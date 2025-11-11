@@ -1,3 +1,4 @@
-pandas
-scikit-learn
-evidently
+evidently~=0.4.15
+pandas~=2.2.2
+scikit-learn~=1.4.2
+joblib~=1.4.0
