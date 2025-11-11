@@ -8,3 +8,6 @@ data/*.csv
 
 # Reports
 reports/
+
+# in .gitignore
+data/hour.csv
