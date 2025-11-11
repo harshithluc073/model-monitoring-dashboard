@@ -39,7 +39,8 @@ jobs:
       
       # Step 4: Run the monitoring script to generate the report
       - name: Run monitoring script
-        run: python scripts/monitor.py
+        run: python monitor.py # We can simplify the command now
+        working-directory: ./scripts # Set the working directory for this step
 
       # Step 5: Upload the generated report as a workflow artifact
       # This allows us to download and view the report from the Actions run page
