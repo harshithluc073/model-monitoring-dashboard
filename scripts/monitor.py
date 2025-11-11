@@ -8,14 +8,11 @@ from evidently.metric_preset import DataDriftPreset, RegressionPreset
 from evidently.pipeline.column_mapping import ColumnMapping
 
 
-SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-
-
 # --- Configuration ---
-REFERENCE_DATA_PATH = os.path.join('data', 'reference_data.csv')
-CURRENT_DATA_PATH = os.path.join('data', 'current_data.csv')
-MODEL_PATH = os.path.join('models', 'model.pkl')
-REPORT_PATH = os.path.join('reports', 'model_performance_dashboard.html')
+REFERENCE_DATA_PATH = os.path.join('..', 'data', 'reference_data.csv')
+CURRENT_DATA_PATH = os.path.join('..', 'data', 'current_data.csv')
+MODEL_PATH = os.path.join('..', 'models', 'model.pkl')
+REPORT_PATH = os.path.join('..', 'reports', 'model_performance_dashboard.html')
 
 TARGET_COLUMN = 'cnt'
 NUMERICAL_FEATURES = ['temp', 'atemp', 'hum', 'windspeed']
