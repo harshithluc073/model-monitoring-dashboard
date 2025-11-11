@@ -1,0 +1,50 @@
+# Name of the GitHub Actions workflow
+name: Model Monitoring
+
+# Controls when the action will run
+on:
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+  # Runs the workflow on a schedule (e.g., every day at midnight UTC)
+  # The cron syntax is: minute hour day(of-month) month day(of-week)
+  # '0 0 * * *' means at minute 0 of hour 0, every day.
+  schedule:
+    - cron: '0 0 * * *'
+
+# Defines the jobs that will run as part of this workflow
+jobs:
+  # We have one job in this workflow, called 'monitoring'
+  monitoring:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+
+    # The sequence of steps that make up the job
+    steps:
+      # Step 1: Checks out your repository's code so the job can access it
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Step 2: Sets up the Python environment
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      # Step 3: Install project dependencies from requirements.txt
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      
+      # Step 4: Run the monitoring script to generate the report
+      - name: Run monitoring script
+        run: python scripts/monitor.py
+
+      # Step 5: Upload the generated report as a workflow artifact
+      # This allows us to download and view the report from the Actions run page
+      - name: Upload monitoring report
+        uses: actions/upload-artifact@v4
+        with:
+          name: monitoring-report # The name of the artifact
+          path: reports/model_performance_dashboard.html # The path to the file to upload
