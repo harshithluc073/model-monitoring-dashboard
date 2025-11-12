@@ -1,6 +1,5 @@
 ---
 title: "🚨 Data Drift Detected!"
-assignees: ${{ github.actor }}
 ---
 ### Model Performance Alert
             

@@ -51,11 +51,11 @@ jobs:
 
       - name: Create GitHub Issue on drift
         if: steps.drift_status.outputs.drift_detected == 'true'
-        # --- THIS IS THE FINAL, VERIFIED ACTION ---
         uses: JasonEtco/create-an-issue@v2
         with:
-          # This action requires the filename of the body content
           filename: .github/ISSUE_TEMPLATE/drift_issue_template.md
+          # ADD THIS LINE BACK:
+          assignees: ${{ github.actor }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PAGE_URL: ${{ steps.deployment.outputs.page_url }}
