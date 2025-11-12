@@ -6,7 +6,6 @@ on:
   schedule:
     - cron: '0 0 * * *'
 
-# Grant the workflow permissions to write content (issues and pages)
 permissions:
   contents: write
   pages: write
@@ -52,19 +51,11 @@ jobs:
 
       - name: Create GitHub Issue on drift
         if: steps.drift_status.outputs.drift_detected == 'true'
-        # --- THIS IS THE CORRECTED LINE ---
-        uses: peter-evans/create-issue@v5
+        # --- THIS IS THE FINAL, VERIFIED ACTION ---
+        uses: JasonEtco/create-an-issue@v2
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          title: "🚨 Data Drift Detected!"
-          body: |
-            ### Model Performance Alert
-            
-            Significant data drift has been detected in the latest monitoring run.
-            
-            Maintainers are advised to review the full report and consider retraining the model.
-            
-            **📊 [View the full dashboard here](${{ steps.deployment.outputs.page_url }})**
-            
-            To trigger the retraining workflow, add the `retrain-model` label to this issue.
-          assignees: ${{ github.actor }}
+          # This action requires the filename of the body content
+          filename: .github/ISSUE_TEMPLATE/drift_issue_template.md
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PAGE_URL: ${{ steps.deployment.outputs.page_url }}
