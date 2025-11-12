@@ -1,3 +1,7 @@
+---
+title: "🚨 Data Drift Detected!"
+assignees: ${{ github.actor }}
+---
 ### Model Performance Alert
             
 Significant data drift has been detected in the latest monitoring run.
