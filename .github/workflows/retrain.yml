@@ -1,0 +1,38 @@
+# Name of the GitHub Actions workflow
+name: Model Retraining
+
+# This workflow is triggered when a label is added to an issue
+on:
+  issues:
+    types: [labeled]
+
+jobs:
+  # The main job for this workflow
+  retrain:
+    # This condition is the key to the trigger. The job will ONLY run if the
+    # label that was just added is exactly 'retrain-model'.
+    if: github.event.label.name == 'retrain-model'
+    
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+
+    # The sequence of steps that make up the job
+    steps:
+      # Step 1: Acknowledge the trigger
+      - name: Acknowledge Retraining Trigger
+        run: |
+          echo "✅ Retraining workflow triggered by adding the 'retrain-model' label."
+          echo "Issue Title: ${{ github.event.issue.title }}"
+          echo "Issue Number: ${{ github.event.issue.number }}"
+          echo "Triggered by: ${{ github.actor }}"
+
+      # Step 2: Checks out your repository's code so the job can access it
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # --- Placeholder for future steps ---
+      # In the next steps, we will add the logic to:
+      # 1. Set up Python
+      # 2. Install dependencies
+      # 3. Run the retraining and validation script
+      # 4. Create a pull request with the new model
