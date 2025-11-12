@@ -2,8 +2,48 @@
 
 This project demonstrates a complete, closed-loop MLOps system built entirely within a GitHub repository. It automates the process of monitoring a machine learning model for performance degradation (like data drift) and orchestrates a human-in-the-loop workflow for seamless retraining and deployment.
 
-![MLOps Lifecycle Diagram](https://i.imgur.com/your-image-code.png) 
-*(Note: You can create a simple diagram using a tool like diagrams.net and upload it to a service like Imgur to get a link, then replace the URL above.)*
+```mermaid
+%%{init: {'theme': 'dark'}}%%
+graph LR
+    %% Style Definitions for attractiveness %%
+    classDef automation fill:#243B53,stroke:#fff,color:#fff
+    classDef human fill:#D65D0E,stroke:#fff,color:#fff
+    classDef success fill:#427B58,stroke:#fff,color:#fff
+    classDef failure fill:#9D2929,stroke:#fff,color:#fff
+
+    %% Node Definitions %%
+    Monitor["📅 Scheduled<br/>Monitoring"]
+    DriftCheck{"Drift<br/>Detected?"}
+    Healthy["✅ System Healthy"]
+    Issue["🚩 Issue Created"]
+    
+    Human["👤 Human<br/>Applies Label"]
+    
+    Retrain["🤖 Automated<br/>Retraining"]
+    Validate{"New Model<br/>Better?"}
+    Discard["❌ Model Discarded"]
+    PR["🔀 PR Opened"]
+    Merge["👩‍💻 Review &<br/>Merge"]
+
+    %% Connections %%
+    Monitor --> DriftCheck
+    DriftCheck -- No --> Healthy
+    DriftCheck -- Yes --> Issue
+    
+    Issue ---> Human
+    Human ---> Retrain
+    
+    Retrain --> Validate
+    Validate -- No --> Discard
+    Validate -- Yes --> PR
+    PR ---> Merge
+
+    %% Apply Styles %%
+    class Monitor,Retrain automation
+    class Human,Merge human
+    class Healthy,PR success
+    class Issue,Discard failure
+```
 
 ---
 
