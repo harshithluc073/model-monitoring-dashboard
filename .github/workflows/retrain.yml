@@ -7,32 +7,72 @@ on:
     types: [labeled]
 
 jobs:
-  # The main job for this workflow
   retrain:
-    # This condition is the key to the trigger. The job will ONLY run if the
-    # label that was just added is exactly 'retrain-model'.
+    # Condition: The job ONLY runs if the label is 'retrain-model'.
     if: github.event.label.name == 'retrain-model'
-    
-    # The type of runner that the job will run on
     runs-on: ubuntu-latest
 
-    # The sequence of steps that make up the job
-    steps:
-      # Step 1: Acknowledge the trigger
-      - name: Acknowledge Retraining Trigger
-        run: |
-          echo "✅ Retraining workflow triggered by adding the 'retrain-model' label."
-          echo "Issue Title: ${{ github.event.issue.title }}"
-          echo "Issue Number: ${{ github.event.issue.number }}"
-          echo "Triggered by: ${{ github.actor }}"
+    # --- NEW: Add permissions for creating branches and pull requests ---
+    permissions:
+      contents: write
+      pull-requests: write
 
-      # Step 2: Checks out your repository's code so the job can access it
+    steps:
+      - name: Acknowledge Retraining Trigger
+        run: echo "✅ Retraining triggered from Issue #${{ github.event.issue.number }}."
+
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # --- Placeholder for future steps ---
-      # In the next steps, we will add the logic to:
-      # 1. Set up Python
-      # 2. Install dependencies
-      # 3. Run the retraining and validation script
-      # 4. Create a pull request with the new model
+      # --- NEW STEPS TO RUN THE SCRIPT ---
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run retraining and validation script
+        run: python scripts/retrain.py
+
+      # --- NEW STEPS TO READ RESULTS AND CREATE PR ---
+      - name: Read validation results
+        id: validation # Give this step an ID to reference its outputs
+        run: |
+          echo "is_better=$(jq .new_model_is_better validation_results.json)" >> $GITHUB_OUTPUT
+          echo "new_rmse=$(jq .new_model_rmse validation_results.json)" >> $GITHUB_OUTPUT
+          echo "old_rmse=$(jq .old_model_rmse validation_results.json)" >> $GITHUB_OUTPUT
+
+      - name: Create Pull Request with New Model
+        # This step ONLY runs if the 'is_better' output from the previous step was 'true'
+        if: steps.validation.outputs.is_better == 'true'
+        uses: peter-evans/create-pull-request@v6
+        with:
+          # Use the secure, built-in GITHUB_TOKEN
+          token: ${{ secrets.GITHUB_TOKEN }}
+          # The message for the commit that will be created
+          commit-message: "feat: Retrain and update model"
+          # The title of the pull request
+          title: "🤖 Automated Model Retraining (Issue #${{ github.event.issue.number }})"
+          # The body of the pull request, using outputs from the 'validation' step
+          body: |
+            ### Automated Model Retraining Complete
+            
+            A new model has been trained and validated based on the request from Issue #${{ github.event.issue.number }}.
+            
+            The new model shows improved performance over the existing production model.
+            
+            **Validation Metrics:**
+            - **Old Model RMSE:** ${{ steps.validation.outputs.old_rmse }}
+            - **New Model RMSE:** ${{ steps.validation.outputs.new_rmse }}
+            
+            Please review the changes and merge this pull request to deploy the new model to production.
+          # The name of the new branch to create for the PR
+          branch: "retrain-model-${{ github.event.issue.number }}"
+          # Automatically add a label to the PR
+          labels: "model-update"
+          # Assign the PR to the person who labeled the issue
+          assignees: ${{ github.actor }}
