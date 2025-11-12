@@ -6,12 +6,12 @@ on:
   schedule:
     - cron: '0 0 * * *'
 
-# --- CHANGE 1: ADD PERMISSIONS ---
-# Grant the workflow permissions to write to the repository (for gh-pages branch)
+# Grant the workflow permissions to write content (issues and pages)
 permissions:
   contents: write
   pages: write
   id-token: write
+  issues: write
 
 jobs:
   monitoring:
@@ -37,16 +37,34 @@ jobs:
         run: python monitor.py
         working-directory: ./scripts
 
-      # --- CHANGE 2: THE OLD UPLOAD-ARTIFACT STEP IS REMOVED ---
-
-      # --- CHANGE 3: ADD DEPLOYMENT STEPS ---
       - name: Upload GitHub Pages artifact
-        # This action prepares the 'reports' folder for deployment
         uses: actions/upload-pages-artifact@v3
         with:
           path: 'reports/'
 
       - name: Deploy to GitHub Pages
-        # This action takes the uploaded artifact and deploys it
         id: deployment
         uses: actions/deploy-pages@v4
+
+      - name: Read drift status
+        id: drift_status
+        run: echo "drift_detected=$(cat drift_status.txt)" >> $GITHUB_OUTPUT
+
+      - name: Create GitHub Issue on drift
+        if: steps.drift_status.outputs.drift_detected == 'true'
+        # --- THIS IS THE CORRECTED LINE ---
+        uses: peter-evans/create-issue@v5
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          title: "🚨 Data Drift Detected!"
+          body: |
+            ### Model Performance Alert
+            
+            Significant data drift has been detected in the latest monitoring run.
+            
+            Maintainers are advised to review the full report and consider retraining the model.
+            
+            **📊 [View the full dashboard here](${{ steps.deployment.outputs.page_url }})**
+            
+            To trigger the retraining workflow, add the `retrain-model` label to this issue.
+          assignees: ${{ github.actor }}
